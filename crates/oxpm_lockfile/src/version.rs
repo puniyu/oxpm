@@ -1,0 +1,1 @@
+pub const VERSION: u32 = const_str::parse!(env!("CARGO_PKG_VERSION_MAJOR"), u32);

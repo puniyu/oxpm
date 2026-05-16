@@ -1,0 +1,46 @@
+[workspace]
+members = ["crates/*"]
+resolver = "2"
+
+[workspace.lints.clippy]
+unwrap_used = "deny"
+
+[workspace.package]
+authors = ["wuliya <3369906077@qq.com>"]
+license = "MIT"
+readme = "README.md"
+homepage = "https://github.com/puniyu/oxpm"
+repository = "https://github.com/puniyu/oxpm"
+edition = "2024"
+rust-version = "1.88.0"
+
+[workspace.dependencies]
+thiserror = { version = "2.0.18" }
+serde = { version = "1.0.228", features = ["derive"] }
+smol_str = { version = "0.3.6", features = ["serde"] }
+ecow = { version = "0.2.6", features = ["serde"] }
+url = { version = "2.5.8", features = ["serde"] }
+serde_json = { version = "1.0.149" }
+indexmap = { version = "2.9", features = ["serde"] }
+toml = { version = "1.1.2" }
+reqwest = { version = "0.13.3", features = ["json"] }
+bytes = { version = "1.11.1" }
+async-trait = { version = "0.1.89" }
+
+tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread"] }
+
+oxpm_semver = { version = "0.1.0", path = "./crates/oxpm_semver" }
+oxpm_package_json = { version = "0.1.0", path = "./crates/oxpm_package_json" }
+oxpm_lockfile = { version = "0.1.0", path = "./crates/oxpm_lockfile" }
+oxpm_npm = { version = "0.1.0", path = "./crates/oxpm_npm" }
+
+
+[profile.release]
+lto = "fat"
+opt-level = "z"
+incremental = false
+
+[profile.dev]
+lto = false
+opt-level = 1
+incremental = true

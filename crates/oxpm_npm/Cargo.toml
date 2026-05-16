@@ -1,0 +1,28 @@
+[package]
+name = "oxpm_npm"
+version = "0.1.0"
+description = "npm for oxpm"
+authors.workspace = true
+license.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+thiserror.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+smol_str.workspace = true
+indexmap.workspace = true
+
+oxpm_semver.workspace = true
+oxpm_package_json.workspace = true
+url.workspace = true
+oxpm_lockfile.workspace = true
+
+rust-ini = "0.21.3"

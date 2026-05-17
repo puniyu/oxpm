@@ -1,6 +1,7 @@
 [package]
-name = "oxpm"
+name = "oxpm_common"
 version = "0.1.0"
+description = "common for oxpm"
 authors.workspace = true
 license.workspace = true
 readme.workspace = true
@@ -10,5 +11,10 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+serde.workspace = true
+url.workspace = true
+smol_str.workspace = true
+thiserror.workspace = true
+sugar_path.workspace = true
 
 

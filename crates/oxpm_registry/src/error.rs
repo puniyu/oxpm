@@ -1,4 +1,5 @@
 use thiserror::Error;
+use smol_str::SmolStr;
 
 #[derive(Debug, Error)]
 pub enum Error {
@@ -7,7 +8,7 @@ pub enum Error {
     #[error("failed to parse registry response")]
     Parse(#[from] serde_json::Error),
     #[error("version `{version}` not found for package `{name}`")]
-    VersionNotFound { name: String, version: String },
+    VersionNotFound { name: SmolStr, version: SmolStr },
     #[error("package `{0}` not found")]
-    PackageNotFound(String),
+    PackageNotFound(SmolStr),
 }

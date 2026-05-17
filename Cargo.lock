@@ -101,6 +101,39 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
 
 [[package]]
+name = "camino"
+version = "1.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e629a66d692cb9ff1a1c664e41771b3dcaf961985a9774c0eb0bd1b51cf60a48"
+dependencies = [
+ "serde_core",
+]
+
+[[package]]
+name = "cargo-platform"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd0061da739915fae12ea00e16397555ed4371a6bb285431aab930f61b0aa4ba"
+dependencies = [
+ "serde",
+ "serde_core",
+]
+
+[[package]]
+name = "cargo_metadata"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef987d17b0a113becdd19d3d0022d04d7ef41f9efe4f3fb63ac44ba61df3ade9"
+dependencies = [
+ "camino",
+ "cargo-platform",
+ "semver",
+ "serde",
+ "serde_json",
+ "thiserror",
+]
+
+[[package]]
 name = "cast"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -910,6 +943,21 @@ name = "oxpm_binding"
 version = "0.1.0"
 
 [[package]]
+name = "oxpm_common"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "smol_str",
+ "sugar_path",
+ "thiserror",
+ "url",
+]
+
+[[package]]
+name = "oxpm_core"
+version = "0.1.0"
+
+[[package]]
 name = "oxpm_install"
 version = "0.1.0"
 
@@ -919,6 +967,7 @@ version = "0.1.0"
 dependencies = [
  "const-str",
  "indexmap",
+ "oxpm_common",
  "oxpm_semver",
  "serde",
  "smol_str",
@@ -931,9 +980,11 @@ name = "oxpm_npm"
 version = "0.1.0"
 dependencies = [
  "indexmap",
+ "oxpm_common",
  "oxpm_lockfile",
  "oxpm_package_json",
  "oxpm_semver",
+ "rayon",
  "rust-ini",
  "serde",
  "serde_json",
@@ -960,7 +1011,10 @@ dependencies = [
 name = "oxpm_registry"
 version = "0.1.0"
 dependencies = [
+ "cargo_metadata",
+ "http",
  "indexmap",
+ "mime",
  "oxpm_package_json",
  "oxpm_semver",
  "reqwest",
@@ -975,6 +1029,16 @@ dependencies = [
 [[package]]
 name = "oxpm_resolver"
 version = "0.1.0"
+dependencies = [
+ "indexmap",
+ "oxpm_common",
+ "oxpm_package_json",
+ "oxpm_registry",
+ "oxpm_semver",
+ "smol_str",
+ "thiserror",
+ "tokio",
+]
 
 [[package]]
 name = "oxpm_semver"
@@ -1421,6 +1485,10 @@ name = "semver"
 version = "1.0.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8a7852d02fc848982e0c167ef163aaff9cd91dc640ba85e263cb1ce46fae51cd"
+dependencies = [
+ "serde",
+ "serde_core",
+]
 
 [[package]]
 name = "serde"
@@ -1539,6 +1607,16 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "sugar_path"
+version = "2.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "36fe837e881ad5c3b60fadeb8e9b0bc5c907c4b7d84b4415a7f0bbc3f9073631"
+dependencies = [
+ "memchr",
+ "smallvec",
+]
 
 [[package]]
 name = "syn"

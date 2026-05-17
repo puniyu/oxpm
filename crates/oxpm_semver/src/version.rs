@@ -4,7 +4,7 @@ use ecow::EcoVec;
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use smol_str::SmolStr;
 
-use crate::error::{Error, Result};
+use crate::{Error, Result};
 
 #[derive(Clone, Debug, Eq)]
 pub struct Version {

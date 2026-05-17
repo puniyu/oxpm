@@ -1,6 +1,7 @@
 [package]
-name = "oxpm"
+name = "oxpm_core"
 version = "0.1.0"
+description = "core for oxpm"
 authors.workspace = true
 license.workspace = true
 readme.workspace = true
@@ -10,5 +11,3 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
-
-

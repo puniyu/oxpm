@@ -3,7 +3,7 @@ use std::fmt;
 use ecow::EcoVec;
 
 use super::comparator::ComparatorSet;
-use crate::{Version, error::{Error, Result}};
+use crate::{Version, Error, Result};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub enum VersionRangeKind {

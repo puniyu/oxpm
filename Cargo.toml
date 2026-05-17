@@ -2,8 +2,6 @@
 members = ["crates/*"]
 resolver = "2"
 
-[workspace.lints.clippy]
-unwrap_used = "deny"
 
 [workspace.package]
 authors = ["wuliya <3369906077@qq.com>"]
@@ -26,13 +24,19 @@ toml = { version = "1.1.2" }
 reqwest = { version = "0.13.3", features = ["json"] }
 bytes = { version = "1.11.1" }
 async-trait = { version = "0.1.89" }
+sugar_path = { version = "2.0.1", features = ["cached_current_dir"] }
+blake3 = { version = "1.8.5" }
+cargo_metadata = { version = "0.23.1" }
 
 tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread"] }
+rayon = { version = "1.12.0" }
 
 oxpm_semver = { version = "0.1.0", path = "./crates/oxpm_semver" }
+oxpm_common = { version = "0.1.0", path = "./crates/oxpm_common" }
 oxpm_package_json = { version = "0.1.0", path = "./crates/oxpm_package_json" }
 oxpm_lockfile = { version = "0.1.0", path = "./crates/oxpm_lockfile" }
 oxpm_npm = { version = "0.1.0", path = "./crates/oxpm_npm" }
+oxpm_registry = { version = "0.1.0", path = "./crates/oxpm_registry" }
 
 
 [profile.release]

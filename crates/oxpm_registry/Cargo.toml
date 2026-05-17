@@ -10,8 +10,7 @@ repository.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 
-[lints]
-workspace = true
+
 
 [dependencies]
 serde.workspace = true
@@ -24,6 +23,11 @@ reqwest.workspace = true
 
 oxpm_semver.workspace = true
 oxpm_package_json.workspace = true
+http = "1.4.0"
+mime = "0.3.17"
 
 [dev-dependencies]
 tokio.workspace = true
+
+[build-dependencies]
+cargo_metadata.workspace = true

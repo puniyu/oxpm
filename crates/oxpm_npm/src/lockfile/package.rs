@@ -1,57 +1,75 @@
+use std::hash::Hash;
 use indexmap::IndexMap;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use smol_str::SmolStr;
 use oxpm_package_json::PackageBin;
 use oxpm_semver::Version;
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Package {
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub name: Option<SmolStr>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub version: Option<Version>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub resolved: Option<SmolStr>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub integrity: Option<SmolStr>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub license: Option<SmolStr>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub link: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub dev: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub optional: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub dev_optional: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub in_bundle: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub has_install_script: Option<bool>,
-	#[serde(skip_serializing_if = "Option::is_none")]
-	pub bin: Option<PackageBin>,
-	#[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-	pub dependencies: IndexMap<SmolStr, SmolStr>,
-	#[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-	pub optional_dependencies: IndexMap<SmolStr, SmolStr>,
-	#[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-	pub peer_dependencies: IndexMap<SmolStr, SmolStr>,
-	#[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-	pub peer_dependencies_meta: IndexMap<SmolStr, PeerDependencyMeta>,
-	#[serde(default, skip_serializing_if = "IndexMap::is_empty")]
-	pub engines: IndexMap<SmolStr, SmolStr>,
-	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub cpu: Vec<SmolStr>,
-	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub os: Vec<SmolStr>,
-	#[serde(default, skip_serializing_if = "Vec::is_empty")]
-	pub bundled_dependencies: Vec<SmolStr>,
+fn empty_str_as_none<'de, D>(deserializer: D) -> Result<Option<SmolStr>, D::Error>
+where
+	D: serde::Deserializer<'de>,
+{
+	match Option::<String>::deserialize(deserializer)? {
+		None => Ok(None),
+		Some(s) if s.is_empty() => Ok(None),
+		Some(s) => Ok(Some(s.into())),
+	}
 }
 
-#[derive(Debug, Default, Clone, Serialize, Deserialize)]
+fn empty_vec_as_none<'de, D, T>(deserializer: D) -> Result<Option<Vec<T>>, D::Error>
+where
+	D: serde::Deserializer<'de>,
+	T: Deserialize<'de>,
+{
+	Ok(Option::<Vec<T>>::deserialize(deserializer)?.filter(|v| !v.is_empty()))
+}
+
+fn empty_map_as_none<'de, D, K, V>(deserializer: D) -> Result<Option<IndexMap<K, V>>, D::Error>
+where
+	D: serde::Deserializer<'de>,
+	K: Deserialize<'de> + Eq + Hash,
+	V: Deserialize<'de>,
+{
+	Ok(Option::<IndexMap<K, V>>::deserialize(deserializer)?.filter(|m| !m.is_empty()))
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Package {
+	pub name: Option<SmolStr>,
+	pub version: Option<Version>,
+	pub resolved: Option<SmolStr>,
+	#[serde(default, deserialize_with = "empty_str_as_none")]
+	pub integrity: Option<SmolStr>,
+	#[serde(default, deserialize_with = "empty_str_as_none")]
+	pub license: Option<SmolStr>,
+	pub link: Option<bool>,
+	pub dev: Option<bool>,
+	pub optional: Option<bool>,
+	pub dev_optional: Option<bool>,
+	pub in_bundle: Option<bool>,
+	pub has_install_script: Option<bool>,
+	pub bin: Option<PackageBin>,
+	#[serde(default, deserialize_with = "empty_map_as_none")]
+	pub dependencies: Option<IndexMap<SmolStr, SmolStr>>,
+	#[serde(default, deserialize_with = "empty_map_as_none")]
+	pub optional_dependencies: Option<IndexMap<SmolStr, SmolStr>>,
+	#[serde(default, deserialize_with = "empty_map_as_none")]
+	pub peer_dependencies: Option<IndexMap<SmolStr, SmolStr>>,
+	#[serde(default)]
+	pub peer_dependencies_meta: Option<IndexMap<SmolStr, PeerDependencyMeta>>,
+	#[serde(default, deserialize_with = "empty_map_as_none")]
+	pub engines: Option<IndexMap<SmolStr, SmolStr>>,
+	#[serde(default, deserialize_with = "empty_vec_as_none")]
+	pub cpu: Option<Vec<SmolStr>>,
+	#[serde(default, deserialize_with = "empty_vec_as_none")]
+	pub os: Option<Vec<SmolStr>>,
+	#[serde(default, deserialize_with = "empty_vec_as_none")]
+	pub bundled_dependencies: Option<Vec<SmolStr>>,
+}
+
+#[derive(Debug, Default, Clone, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PeerDependencyMeta {
-	#[serde(skip_serializing_if = "Option::is_none")]
 	pub optional: Option<bool>,
 }

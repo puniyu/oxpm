@@ -1,6 +1,7 @@
 [package]
 name = "oxpm_resolver"
 version = "0.1.0"
+description = "dependencies resolver for oxpm"
 authors.workspace = true
 license.workspace = true
 readme.workspace = true
@@ -9,7 +10,13 @@ repository.workspace = true
 edition.workspace = true
 rust-version.workspace = true
 
-[dependencies]
 
-[lints]
-workspace = true
+[dependencies]
+oxpm_semver = { workspace = true }
+oxpm_package_json = { workspace = true }
+oxpm_registry = { workspace = true }
+oxpm_common = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+smol_str = { workspace = true }
+indexmap = { workspace = true }

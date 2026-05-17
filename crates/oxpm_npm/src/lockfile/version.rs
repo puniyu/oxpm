@@ -1,6 +1,6 @@
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Deserializer};
 
-use super::Error;
+use crate::LockFileError;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum LockfileVersion {
@@ -9,29 +9,23 @@ pub enum LockfileVersion {
 
 impl LockfileVersion {
 	pub const fn as_u32(self) -> u32 {
-		3
-	}
-}
-
-impl TryFrom<u64> for LockfileVersion {
-	type Error = Error;
-
-	fn try_from(value: u64) -> Result<Self, Self::Error> {
-		match value {
-			3 => Ok(Self::V3),
-			other => Err(Error::UnsupportedLockfileVersion(other)),
+		match self {
+			Self::V3 => 3,
 		}
 	}
 }
 
-impl Serialize for LockfileVersion {
-	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-	where
-		S: Serializer,
-	{
-		serializer.serialize_u32(self.as_u32())
+impl TryFrom<u64> for LockfileVersion {
+	type Error = LockFileError;
+
+	fn try_from(value: u64) -> Result<Self, Self::Error> {
+		match value {
+			3 => Ok(Self::V3),
+			other => Err(LockFileError::UnsupportedLockfileVersion(other)),
+		}
 	}
 }
+
 
 impl<'de> Deserialize<'de> for LockfileVersion {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

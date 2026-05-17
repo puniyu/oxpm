@@ -1,11 +1,8 @@
 mod error;
-mod package;
+pub use error::Error;
 mod range;
-mod spec;
-mod version;
-
-pub use error::{Error, Result};
-pub use package::PackageReq;
 pub use range::VersionRange;
-pub use spec::{TagSpec, VersionSpec};
+mod version;
 pub use version::Version;
+
+pub type Result<T> = std::result::Result<T, Error>;

@@ -8,7 +8,7 @@ use std::{fmt, str::FromStr};
 use serde::{Deserialize, Deserializer, Serialize, Serializer, de};
 use smol_str::SmolStr;
 
-use crate::{Version, error::{Error, Result}};
+use crate::{Version, Error, Result};
 
 #[derive(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct VersionRange {

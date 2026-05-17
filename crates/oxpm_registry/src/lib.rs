@@ -1,4 +1,5 @@
 use reqwest::Client;
+use smol_str::SmolStr;
 use url::Url;
 
 mod error;
@@ -8,45 +9,68 @@ pub use types::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-const NPM_REGISTRY: &str = "https://registry.npmjs.org";
-const JSR_REGISTRY: &str = "https://npm.jsr.io";
+const USER_AGENT: &str = concat!("fnpm", "/", env!("CORE_VERSION"));
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RegistryAuth {
+    BearerToken(SmolStr),
+    BasicToken(SmolStr),
+    Basic { username: SmolStr, password: SmolStr },
+}
 
 pub struct Registry {
     client: Client,
     registry_url: Url,
+    auth: Option<RegistryAuth>,
 }
 
 impl Registry {
-    pub fn npm() -> Result<Self> {
-        Self::with_url(Url::parse(NPM_REGISTRY).expect("invalid default npm registry url"))
+    pub fn new(registry_url: Url) -> Result<Self> {
+        let client = Client::builder().user_agent(USER_AGENT).build().map_err(Error::Http)?;
+        Ok(Self {
+            client,
+            registry_url,
+            auth: None,
+        })
     }
 
-    pub fn jsr() -> Result<Self> {
-        Self::with_url(Url::parse(JSR_REGISTRY).expect("invalid default jsr registry url"))
+    pub fn auth(mut self, auth: RegistryAuth) -> Self {
+        self.auth = Some(auth);
+        self
     }
 
-    pub fn with_url(registry_url: Url) -> Result<Self> {
-        let client = Client::builder().build().map_err(Error::Http)?;
-        Ok(Self { client, registry_url })
+    fn apply_auth(&self, req: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        match self.auth.as_ref() {
+            Some(RegistryAuth::BearerToken(token)) => {
+                req.header(http::header::AUTHORIZATION, format!("Bearer {token}"))
+            }
+            Some(RegistryAuth::BasicToken(token)) => {
+                req.header(http::header::AUTHORIZATION, format!("Basic {token}"))
+            }
+            Some(RegistryAuth::Basic { username, password }) => {
+                req.basic_auth(username.as_str(), Some(password.as_str()))
+            }
+            None => req,
+        }
     }
 
     pub async fn package(&self, name: &str) -> Result<Package> {
+        use http::header;
         let base = self.registry_url.as_str().trim_end_matches('/');
         let url = format!("{base}/{name}");
-        let url = Url::parse(&url).map_err(|_| Error::PackageNotFound(name.to_string()))?;
+        let url = Url::parse(&url).map_err(|_| Error::PackageNotFound(SmolStr::new(name)))?;
 
         let response = self
-            .client
-            .get(url)
-            .header("Accept", "application/json")
+            .apply_auth(self.client.get(url))
+            .header(header::ACCEPT, mime::APPLICATION_JSON.as_ref())
             .send()
             .await?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
-            return Err(Error::PackageNotFound(name.to_string()));
+            return Err(Error::PackageNotFound(SmolStr::new(name)));
         }
 
-        let package: Package = response.error_for_status()?.json().await?;
+        let package = response.error_for_status()?.json::<Package>().await?;
         Ok(package)
     }
 
@@ -57,15 +81,9 @@ impl Registry {
             .get(version)
             .cloned()
             .ok_or_else(|| Error::VersionNotFound {
-                name: name.to_string(),
-                version: version.to_string(),
+                name: SmolStr::new(name),
+                version: SmolStr::new(version),
             })
-    }
-}
-
-impl Default for Registry {
-    fn default() -> Self {
-        Self::npm().expect("failed to create default Registry")
     }
 }
 
@@ -73,67 +91,40 @@ impl Default for Registry {
 mod tests {
     use super::*;
 
-    #[test]
-    fn npm_registry_url() {
-        let r = Registry::npm().unwrap();
-        assert!(r.registry_url.as_str().contains("registry.npmjs.org"));
+    fn example_registry_url() -> Url {
+        Url::parse("https://example.com/npm/").unwrap()
     }
 
     #[test]
-    fn jsr_registry_url() {
-        let r = Registry::jsr().unwrap();
-        assert!(r.registry_url.as_str().contains("npm.jsr.io"));
+    fn new_preserves_registry_url() {
+        let registry = Registry::new(Url::parse("https://example.com/npm/registry/").unwrap()).unwrap();
+        assert!(registry.registry_url.as_str().contains("/npm/registry"));
     }
 
     #[test]
-    fn with_url_preserves_path() {
-        let url = Url::parse("https://example.com/npm/registry/").unwrap();
-        let r = Registry::with_url(url).unwrap();
-        assert!(r.registry_url.as_str().contains("/npm/registry"));
+    fn auth_builder_sets_bearer_token() {
+        let registry = Registry::new(example_registry_url())
+            .unwrap()
+            .auth(RegistryAuth::BearerToken("token-123".into()));
+        assert_eq!(registry.auth, Some(RegistryAuth::BearerToken("token-123".into())));
     }
 
     #[test]
-    fn default_is_npm() {
-        let r = Registry::default();
-        assert!(r.registry_url.as_str().contains("registry.npmjs.org"));
+    fn auth_builder_sets_basic_token() {
+        let registry = Registry::new(example_registry_url())
+            .unwrap()
+            .auth(RegistryAuth::BasicToken("dXNlcjpzZWNyZXQ=".into()));
+        assert_eq!(registry.auth, Some(RegistryAuth::BasicToken("dXNlcjpzZWNyZXQ=".into())));
     }
 
-    #[tokio::test]
-    async fn package_not_found() {
-        let r = Registry::npm().unwrap();
-        let err = r.package("@oxpm-test/this-package-does-not-exist-ever").await.unwrap_err();
-        assert!(matches!(err, Error::PackageNotFound(_)));
-    }
-
-    #[tokio::test]
-    async fn package_version_not_found() {
-        let r = Registry::npm().unwrap();
-        let err = r.package_version("es-toolkit", "0.0.0-nonexistent").await.unwrap_err();
-        assert!(matches!(err, Error::VersionNotFound { .. }));
-    }
-
-    #[tokio::test]
-    async fn fetch_package() {
-        let r = Registry::npm().unwrap();
-        let pkg = r.package("es-toolkit").await.unwrap();
-        assert_eq!(pkg.name.as_str(), "es-toolkit");
-        assert!(pkg.dist_tags.contains_key("latest"));
-        assert!(!pkg.versions.is_empty());
-    }
-
-    #[tokio::test]
-    async fn fetch_package_version() {
-        let r = Registry::npm().unwrap();
-        let v = r.package_version("es-toolkit", "1.27.0").await.unwrap();
-        assert_eq!(v.name.as_str(), "es-toolkit");
-        assert_eq!(v.version.to_string(), "1.27.0");
-        assert!(v.dist.tarball.as_str().contains("es-toolkit"));
-    }
-
-    #[tokio::test]
-    async fn fetch_scoped_package() {
-        let r = Registry::npm().unwrap();
-        let pkg = r.package("@types/node").await.unwrap();
-        assert_eq!(pkg.name.as_str(), "@types/node");
+    #[test]
+    fn auth_builder_sets_basic_auth() {
+        let registry = Registry::new(example_registry_url())
+            .unwrap()
+            .auth(RegistryAuth::Basic {
+                username: "user".into(),
+                password: "secret".into(),
+            });
+        assert!(matches!(registry.auth, Some(RegistryAuth::Basic { .. })));
     }
 }

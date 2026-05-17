@@ -141,7 +141,7 @@ fn save_and_load_file() {
 	lf.packages.push(Package {
 		name: "test-pkg".into(),
 		version: "1.2.3".parse().expect("version"),
-		source: SourceType::parse("registry+https://registry.npmjs.org"),
+		source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 		integrity: Some("sha512-test".into()),
 		dependencies: None,
 		dev_dependencies: None,
@@ -238,7 +238,7 @@ fn serialize_includes_version() {
 	lf.packages.push(Package {
 		name: "test".into(),
 		version: "1.0.0".parse().unwrap(),
-		source: SourceType::parse("registry+https://registry.npmjs.org"),
+		source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 		integrity: None,
 		dependencies: None,
 		dev_dependencies: None,
@@ -270,7 +270,7 @@ fn save_to_path_and_load() {
 	lf.packages.push(Package {
 		name: "lodash".into(),
 		version: "4.17.21".parse().unwrap(),
-		source: SourceType::parse("registry+https://registry.npmjs.org"),
+		source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 		integrity: None,
 		dependencies: Some(vec!["dep-a@1.0.0".into()]),
 		dev_dependencies: None,
@@ -335,7 +335,7 @@ fn bin_true_serialized() {
 	let pkg = Package {
 		name: "has-bin".into(),
 		version: "1.0.0".parse().unwrap(),
-		source: SourceType::parse("registry+https://registry.npmjs.org"),
+		source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 		integrity: None,
 		dependencies: None,
 		dev_dependencies: None,

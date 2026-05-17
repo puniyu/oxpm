@@ -20,7 +20,7 @@ where
 	if s.is_empty() {
 		return Err(serde::de::Error::custom("empty source string"));
 	}
-	Ok(SourceType::parse(&s))
+	SourceType::parse(&s).map_err(serde::de::Error::custom)
 }
 
 
@@ -267,7 +267,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "empty-deps".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org"),
+			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -292,7 +292,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "express".into(),
 			version: "4.18.2".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org"),
+			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -313,7 +313,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "no-engines".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org"),
+			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -333,7 +333,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "no-bin".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org"),
+			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,

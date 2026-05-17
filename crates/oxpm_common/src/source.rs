@@ -29,29 +29,31 @@ pub enum SourceType {
 
 impl SourceType {
 	#[inline]
-	pub fn parse(source: &str) -> Self {
+	pub fn parse(source: &str) -> Result<Self, SourceError> {
 		if let Some(stripped) = source.strip_prefix("git+") {
-			return match GitSource::parse_git_url(stripped) {
+			return Ok(match GitSource::parse_git_url(stripped) {
 				Some(s) => SourceType::Git(s),
 				None => SourceType::Git(GitSource::try_from(stripped).expect("invalid git source")),
-			};
+			});
 		}
 		if let Some(path) = source.strip_prefix("file:") {
-			return SourceType::File(FileSource::from(path));
+			return Ok(SourceType::File(FileSource::from(path)));
 		}
 		if let Some(path) = source.strip_prefix("link:") {
-			return SourceType::Link(LinkSource::from(path));
+			return Ok(SourceType::Link(LinkSource::from(path)));
 		}
 		if let Some(path) = source.strip_prefix("workspace:") {
-			return SourceType::Workspace(WorkspaceSource::from(path));
+			return Ok(SourceType::Workspace(WorkspaceSource::from(path)));
 		}
 		if let Some(path) = source.strip_prefix("tarball:") {
-			return SourceType::Tarball(TarballSource::from_path(path).expect("invalid tarball path"));
+			return Ok(SourceType::Tarball(TarballSource::from_path(path).expect("invalid tarball path")));
 		}
 		if let Some(origin) = source.strip_prefix("registry+") {
-			return SourceType::Registry(RegistrySource::try_from(origin).expect("invalid registry source"));
+			return Ok(SourceType::Registry(
+				RegistrySource::try_from(origin).map_err(|_| SourceError(origin.to_string()))?,
+			));
 		}
-		SourceType::Registry(RegistrySource::try_from(source).expect("invalid source"))
+		Ok(SourceType::Registry(RegistrySource::try_from(source).map_err(|_| SourceError(source.to_string()))?))
 	}
 
 	#[inline]
@@ -182,7 +184,7 @@ impl TryFrom<&str> for SourceType {
 		if value.is_empty() {
 			return Err(SourceError("empty source".to_string()));
 		}
-		Ok(Self::parse(value))
+		Self::parse(value)
 	}
 }
 

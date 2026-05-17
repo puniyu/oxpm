@@ -1,7 +1,7 @@
 mod comparator;
 mod kind;
 
-pub(crate) use kind::VersionRangeKind;
+pub use kind::VersionRangeKind;
 
 use std::{fmt, str::FromStr};
 
@@ -28,6 +28,10 @@ impl VersionRange {
 
     pub fn matches(&self, version: &Version) -> bool {
         self.kind.matches(version)
+    }
+
+    pub fn kind(&self) -> &VersionRangeKind {
+        &self.kind
     }
 
     pub fn as_str(&self) -> &str {

@@ -33,6 +33,7 @@ rayon = { version = "1.12.0" }
 
 oxpm_semver = { version = "0.1.0", path = "./crates/oxpm_semver" }
 oxpm_common = { version = "0.1.0", path = "./crates/oxpm_common" }
+oxpm_config = { version = "0.1.0", path = "./crates/oxpm_config" }
 oxpm_package_json = { version = "0.1.0", path = "./crates/oxpm_package_json" }
 oxpm_lockfile = { version = "0.1.0", path = "./crates/oxpm_lockfile" }
 oxpm_npm = { version = "0.1.0", path = "./crates/oxpm_npm" }

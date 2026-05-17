@@ -80,7 +80,7 @@ impl Cache {
 
         let source = self
             .resolve_source(package.resolved.as_ref())
-            .unwrap_or_else(|| SourceType::parse("registry+https://registry.npmjs.org"));
+            .unwrap_or_else(|| SourceType::parse("registry+https://registry.npmjs.org").unwrap());
         let has_bin = package.bin.is_some();
 
         let deps = package.dependencies.clone().map(|deps| dependency_specs(&deps));
@@ -119,10 +119,10 @@ impl Cache {
         let source = if resolved.starts_with("http://") || resolved.starts_with("https://") {
             let url = url::Url::parse(resolved).ok()?;
             let origin = url.origin().ascii_serialization();
-            SourceType::parse(&format!("registry+{origin}"))
+            SourceType::parse(&format!("registry+{origin}")).ok()
         } else {
-            SourceType::parse(resolved)
-        };
+            SourceType::parse(resolved).ok()
+        }?;
         self.source_cache.write().unwrap().insert(resolved.clone(), source.clone());
         Some(source)
     }

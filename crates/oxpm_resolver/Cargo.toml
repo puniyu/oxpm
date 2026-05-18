@@ -17,6 +17,7 @@ oxpm_package_json = { workspace = true }
 oxpm_registry = { workspace = true }
 oxpm_common = { workspace = true }
 oxpm_config = { workspace = true }
+oxpm_tar = { workspace = true, features = ["zstd", "bz2"] }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["fs", "io-util"] }
 serde = { workspace = true }
@@ -24,7 +25,4 @@ serde_json = { workspace = true }
 url = { workspace = true }
 smol_str = { workspace = true }
 indexmap = { workspace = true }
-flate2 = "1.1"
-tar = "0.4"
-blake3 = { workspace = true }
 reqwest = { workspace = true }

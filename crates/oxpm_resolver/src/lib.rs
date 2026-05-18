@@ -1,7 +1,6 @@
 mod cache;
 mod error;
 pub use error::Error;
-mod tarball;
 mod version;
 mod source;
 mod dep;

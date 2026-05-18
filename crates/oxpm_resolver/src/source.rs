@@ -7,9 +7,8 @@ use crate::cache::PackageCache;
 use crate::error::Error;
 use crate::types::{DepNode, DepType};
 use crate::Result;
-use crate::tarball::{download_and_extract, extract_tarball};
+use oxpm_tar::Extract;
 
-/// 解析 registry 来源
 pub async fn resolve_registry(
     name: &SmolStr,
     range: &str,
@@ -26,15 +25,9 @@ pub async fn resolve_registry(
     let (version, package_version) = crate::version::select_version(name, range, &pkg_info)?;
 
     let source_type = oxpm_common::SourceType::Registry(source.clone());
-
-    // 检查缓存
     if let Some(cached) = cache.get(name, &version, &source_type) {
         return Ok(cached);
     }
-
-    let extracted = download_and_extract(&package_version.dist.tarball).await?;
-    let pkg_json_path = extracted.join("package.json");
-    let _pkg = PackageJson::load_from_path(&pkg_json_path)?;
 
     let integrity = package_version.dist.integrity.clone();
 
@@ -45,13 +38,11 @@ pub async fn resolve_registry(
         node = node.with_integrity(integrity);
     }
 
-    // 插入缓存
     cache.insert(name.clone(), version, source_type, node.clone());
 
     Ok(node)
 }
 
-/// 解析 file 来源
 pub async fn resolve_file(
     name: &SmolStr,
     range: &str,
@@ -68,7 +59,6 @@ pub async fn resolve_file(
 
     let source_type = oxpm_common::SourceType::File(source.clone());
 
-    // 检查缓存
     if let Some(cached) = cache.get(name, &version, &source_type) {
         return Ok(cached);
     }
@@ -77,13 +67,12 @@ pub async fn resolve_file(
         .with_source(source_type.clone())
         .with_range(SmolStr::new(range));
 
-    // 插入缓存
     cache.insert(name.clone(), version, source_type, node.clone());
 
     Ok(node)
 }
 
-/// 解析 link 来源
+
 pub async fn resolve_link(
     name: &SmolStr,
     range: &str,
@@ -101,7 +90,6 @@ pub async fn resolve_link(
 
     let source_type = oxpm_common::SourceType::Link(source.clone());
 
-    // 检查缓存
     if let Some(cached) = cache.get(name, &version, &source_type) {
         return Ok(cached);
     }
@@ -110,13 +98,12 @@ pub async fn resolve_link(
         .with_source(source_type.clone())
         .with_range(SmolStr::new(range));
 
-    // 插入缓存
     cache.insert(name.clone(), version, source_type, node.clone());
 
     Ok(node)
 }
 
-/// 解析 tarball 来源
+
 pub async fn resolve_tarball(
     name: &SmolStr,
     range: &str,
@@ -124,9 +111,15 @@ pub async fn resolve_tarball(
     dep_type: DepType,
     cache: &PackageCache,
 ) -> Result<DepNode> {
-    let extracted = extract_tarball(source.path()).await?;
-    let package_json_path = extracted.join("package.json");
-    let pkg = PackageJson::load_from_path(&package_json_path)?;
+    let tarball_path = PathBuf::from(source.path());
+    let json = tokio::task::spawn_blocking({
+        let tarball_path = tarball_path.clone();
+        move || Extract::default().read_file(&tarball_path, "package.json")
+    })
+    .await
+    .map_err(|_| std::io::Error::new(std::io::ErrorKind::Interrupted, "spawn cancelled"))?
+    .map_err(Error::Tar)?;
+    let pkg = PackageJson::load_from_str(&json)?;
     let version = pkg.version.clone().ok_or_else(|| Error::VersionNotFound {
         name: name.clone(),
         range: SmolStr::new(range),

@@ -1,6 +1,6 @@
+
 use std::collections::VecDeque;
 use std::path::PathBuf;
-use std::sync::LazyLock;
 
 use indexmap::IndexMap;
 use oxpm_config::{Config, ScopeType};
@@ -12,8 +12,6 @@ use crate::Result;
 use crate::cache::PackageCache;
 use crate::error::Error;
 use crate::types::{DepNode, DepRoot, DepTask, DepType, DependencyTree};
-
-static CACHE_DIR: LazyLock<PathBuf> = LazyLock::new(|| std::env::temp_dir().join("oxpm"));
 
 pub struct Resolver {
 	config: Config,
@@ -46,14 +44,6 @@ impl Resolver {
 		}
 		Ok(registry)
 	}
-	fn package_scope(pkg: &PackageJson) -> Option<ScopeType> {
-		let name = pkg.name.as_ref()?;
-		if name.starts_with('@') && let Some(at_pos) = name.find('/') {
-			let scope_str = &name[1..at_pos];
-			return Some(ScopeType::from(scope_str));
-		}
-		None
-	}
 
 	pub async fn resolve(mut self) -> Result<DependencyTree> {
 		let pkg = self
@@ -70,11 +60,6 @@ impl Resolver {
 		})?;
 
 		self.apply_overrides(&pkg.overrides);
-
-		// 获取根包的 scope，用于选择 registry
-		let _root_scope = Self::package_scope(&pkg);
-		// 根据 scope 从 config 获取 registry URL（后续用于多 registry 支持）
-		let _registry_url = self.config.registry.for_scope(_root_scope.as_ref());
 
 		let root = DepRoot::new(name.clone(), version, PathBuf::from("."));
 		let mut tree = DependencyTree::new(root);
@@ -95,11 +80,6 @@ impl Resolver {
 			match resolved {
 				Ok(node) => {
 					tree.nodes.push(node.clone());
-					if let Some(child_deps) = self.load_child_deps(&node) {
-						for child in child_deps {
-							tasks.push_back(child);
-						}
-					}
 				}
 				Err(e) => {
 					if task.dep_type != DepType::Optional {
@@ -110,15 +90,6 @@ impl Resolver {
 		}
 
 		Ok(tree)
-	}
-
-	/// 加载子包的依赖列表
-	fn load_child_deps(&self, node: &DepNode) -> Option<Vec<DepTask>> {
-		let hash = blake3::hash(format!("{}@{}", node.name, node.version).as_bytes());
-		let cache_subdir = CACHE_DIR.join(format!("pkg-{}", &hash.to_hex().to_string()[..16]));
-		let pkg_json_path = cache_subdir.join("extracted/package.json");
-		let pkg = PackageJson::load_from_path(&pkg_json_path).ok()?;
-		Some(self.collect_deps(&pkg))
 	}
 
 	/// 收集 PackageJson 中的所有依赖为待处理任务

@@ -32,4 +32,7 @@ pub enum Error {
 
     #[error("http error: {0}")]
     Http(#[from] reqwest::Error),
+
+    #[error("tar error: {0}")]
+    Tar(#[from] oxpm_tar::Error),
 }

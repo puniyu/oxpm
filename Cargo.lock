@@ -1117,17 +1117,18 @@ dependencies = [
 name = "oxpm_resolver"
 version = "0.1.0"
 dependencies = [
+ "flate2",
  "indexmap",
  "oxpm_common",
  "oxpm_config",
  "oxpm_package_json",
  "oxpm_registry",
  "oxpm_semver",
- "oxpm_tar",
  "reqwest",
  "serde",
  "serde_json",
  "smol_str",
+ "tar",
  "thiserror",
  "tokio",
  "url",

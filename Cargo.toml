@@ -25,6 +25,8 @@ reqwest = { version = "0.13.3", features = ["json"] }
 bytes = { version = "1.11.1" }
 async-trait = { version = "0.1.89" }
 sugar_path = { version = "2.0.1", features = ["cached_current_dir"] }
+tar = { version = "0.4" }
+flate2 = { version = "1.1" }
 blake3 = { version = "1.8.5" }
 cargo_metadata = { version = "0.23.1" }
 

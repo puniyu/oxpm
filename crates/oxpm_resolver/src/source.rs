@@ -1,13 +1,15 @@
-use std::path::PathBuf;
+use std::io::Read;
+use std::path::{Path, PathBuf};
 use smol_str::SmolStr;
 
+use flate2::read::GzDecoder;
 use oxpm_package_json::PackageJson;
+use tar::Archive;
 
 use crate::cache::PackageCache;
 use crate::error::Error;
 use crate::types::{DepNode, DepType};
 use crate::Result;
-use oxpm_tar::Extract;
 
 pub async fn resolve_registry(
     name: &SmolStr,
@@ -114,11 +116,13 @@ pub async fn resolve_tarball(
     let tarball_path = PathBuf::from(source.path());
     let json = tokio::task::spawn_blocking({
         let tarball_path = tarball_path.clone();
-        move || Extract::default().read_file(&tarball_path, "package.json")
+        move || {
+            read_file_from_tarball(&tarball_path, "package.json")
+                .map_err(|e| Error::Archive(format!("{}: {}", tarball_path.display(), e)))
+        }
     })
     .await
-    .map_err(|_| std::io::Error::new(std::io::ErrorKind::Interrupted, "spawn cancelled"))?
-    .map_err(Error::Tar)?;
+    .map_err(|_| std::io::Error::new(std::io::ErrorKind::Interrupted, "spawn cancelled"))??;
     let pkg = PackageJson::load_from_str(&json)?;
     let version = pkg.version.clone().ok_or_else(|| Error::VersionNotFound {
         name: name.clone(),
@@ -165,4 +169,27 @@ fn resolve_link_target(mut path: PathBuf) -> Result<PathBuf> {
             return Ok(path);
         }
     }
+}
+
+fn read_file_from_tarball(tarball_path: &Path, file_path: &str) -> std::io::Result<String> {
+    let reader = std::fs::File::open(tarball_path)?;
+    let reader = std::io::BufReader::new(reader);
+    let decoder = GzDecoder::new(reader);
+    let mut archive = Archive::new(decoder);
+    for entry in archive.entries()? {
+        let mut entry = entry?;
+        let entry_path = entry.path()?;
+        let entry_str = entry_path.to_str().ok_or_else(|| {
+            std::io::Error::new(std::io::ErrorKind::InvalidData, "invalid path in tarball")
+        })?;
+        if entry_str == file_path || entry_str == format!("package/{}", file_path) {
+            let mut contents = String::new();
+            entry.read_to_string(&mut contents)?;
+            return Ok(contents);
+        }
+    }
+    Err(std::io::Error::new(
+        std::io::ErrorKind::NotFound,
+        format!("file not found in tarball: {}", file_path),
+    ))
 }

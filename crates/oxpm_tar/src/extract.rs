@@ -27,24 +27,6 @@ impl Extract {
         archive.unpack(dest).map_err(|e| Error::Archive(e.to_string()))?;
         Ok(())
     }
-
-    pub fn read_file(&self, src: &Path, file_path: &str) -> super::Result<String> {
-        let reader = std::fs::File::open(src).map_err(Error::Io)?;
-        let reader = std::io::BufReader::new(reader);
-        let decoder = make_decoder(reader, self.format)?;
-        let mut archive = tar::Archive::new(decoder);
-        for entry in archive.entries().map_err(|e| Error::Archive(e.to_string()))? {
-            let mut entry = entry.map_err(|e| Error::Archive(e.to_string()))?;
-            let entry_path = entry.path().map_err(|e| Error::Archive(e.to_string()))?;
-            let entry_str = entry_path.to_str().ok_or_else(|| Error::Archive("invalid path".into()))?;
-            if entry_str == file_path || entry_str == format!("package/{}", file_path) {
-                let mut contents = String::new();
-                entry.read_to_string(&mut contents).map_err(Error::Io)?;
-                return Ok(contents);
-            }
-        }
-        Err(Error::Archive(format!("file not found in tarball: {}", file_path)))
-    }
 }
 
 fn make_decoder<R: Read + 'static>(reader: R, format: CompressionFormat) -> super::Result<Box<dyn Read>> {

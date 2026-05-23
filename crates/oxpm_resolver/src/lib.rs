@@ -1,12 +1,15 @@
-mod cache;
-mod error;
-pub use error::Error;
-mod version;
-mod source;
-mod dep;
-mod types;
-pub use types::*;
-mod resolver;
-pub use resolver::Resolver;
+use async_trait::async_trait;
+use oxpm_dep::{DepNode, DepType};
+use smol_str::SmolStr;
 
-pub type Result<T> = std::result::Result<T, Error>;
+#[async_trait]
+pub trait Resolver: Send + Sync + 'static {
+    type Source;
+
+    async fn resolve(
+        &self,
+        name: &SmolStr,
+        range: &str,
+        dep_type: DepType,
+    ) -> std::result::Result<DepNode, Box<dyn std::error::Error + Send + Sync>>;
+}

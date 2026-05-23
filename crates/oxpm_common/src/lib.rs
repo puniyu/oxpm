@@ -1,7 +1,3 @@
-mod error;
-pub use error::*;
-
-mod source;
-pub use source::*;
-
-pub type Result<T> = std::result::Result<T, Error>;
+// oxpm_common - public utilities for oxpm
+// Note: Source types have been migrated to individual protocol crates (oxpm_file, oxpm_git, etc.)
+// and oxpm_dep for SourceType. This crate is kept for any future shared utilities.

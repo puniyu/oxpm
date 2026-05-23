@@ -20,6 +20,6 @@ thiserror.workspace = true
 toml.workspace = true
 
 oxpm_semver.workspace = true
-oxpm_common.workspace = true
+oxpm_dep.workspace = true
 const-str = "1.1.0"
 

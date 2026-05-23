@@ -39,6 +39,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "940b3a0ca603d1eade50a4846a2afffd5ef57a9feac2c0e2ec2e14f9ead76000"
 
 [[package]]
+name = "async-trait"
+version = "0.1.89"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9035ad2d096bed7955a320ee7e2230574d28fd3c3a0f186cbea1ff3c7eed5dbb"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -105,15 +116,6 @@ name = "bytes"
 version = "1.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1e748733b7cbc798e1434b6ac524f0c1ff2ab456fe201501e6497c8417a4fc33"
-
-[[package]]
-name = "bzip2"
-version = "0.6.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3a53fac24f34a81bc9954b5d6cfce0c21e18ec6959f44f56e8e90e4bb7c346c"
-dependencies = [
- "libbz2-rs-sys",
-]
 
 [[package]]
 name = "camino"
@@ -250,26 +252,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "const-random"
-version = "0.1.18"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "87e00182fe74b066627d63b85fd550ac2998d4b0bd86bfed477a0ae4c7c71359"
-dependencies = [
- "const-random-macro",
-]
-
-[[package]]
-name = "const-random-macro"
-version = "0.1.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9d839f2a20b0aee515dc581a6172f2321f96cab76c1a38a4c584a194955390e"
-dependencies = [
- "getrandom 0.2.17",
- "once_cell",
- "tiny-keccak",
-]
-
-[[package]]
 name = "const-str"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -385,15 +367,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "dlv-list"
-version = "0.5.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "442039f5147480ba31067cb00ada1adae6892028e40e45fc5de7b7df6dcc1b5f"
-dependencies = [
- "const-random",
 ]
 
 [[package]]
@@ -584,12 +557,6 @@ dependencies = [
  "crunchy",
  "zerocopy",
 ]
-
-[[package]]
-name = "hashbrown"
-version = "0.14.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hashbrown"
@@ -807,7 +774,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d466e9454f08e4a911e14806c24e16fba1b4c121d1ea474396f396069cf949d9"
 dependencies = [
  "equivalent",
- "hashbrown 0.17.1",
+ "hashbrown",
  "serde",
  "serde_core",
 ]
@@ -905,12 +872,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "libbz2-rs-sys"
-version = "0.2.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34b357333733e8260735ba5894eb928c02ecc69c78715f01a8019e7fa7f2db4c"
-
-[[package]]
 name = "libc"
 version = "0.2.186"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1001,16 +962,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7c87def4c32ab89d880effc9e097653c8da5d6ef28e6b539d313baaacfbafcbe"
 
 [[package]]
-name = "ordered-multimap"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "49203cdcae0030493bad186b28da2fa25645fa276a51b6fec8010d281e02ef79"
-dependencies = [
- "dlv-list",
- "hashbrown 0.14.5",
-]
-
-[[package]]
 name = "oxpm"
 version = "0.1.0"
 
@@ -1045,8 +996,66 @@ name = "oxpm_core"
 version = "0.1.0"
 
 [[package]]
+name = "oxpm_dep"
+version = "0.1.0"
+dependencies = [
+ "oxpm_semver",
+ "serde",
+ "serde_json",
+ "smol_str",
+]
+
+[[package]]
+name = "oxpm_file"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "oxpm_dep",
+ "oxpm_package_json",
+ "oxpm_resolver",
+ "oxpm_source",
+ "serde",
+ "smol_str",
+ "sugar_path",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
+name = "oxpm_git"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "oxpm_dep",
+ "oxpm_resolver",
+ "oxpm_semver",
+ "oxpm_source",
+ "serde",
+ "smol_str",
+ "thiserror",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "oxpm_install"
 version = "0.1.0"
+
+[[package]]
+name = "oxpm_link"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "oxpm_dep",
+ "oxpm_package_json",
+ "oxpm_resolver",
+ "oxpm_source",
+ "serde",
+ "smol_str",
+ "sugar_path",
+ "thiserror",
+ "tokio",
+]
 
 [[package]]
 name = "oxpm_lockfile"
@@ -1054,30 +1063,12 @@ version = "0.1.0"
 dependencies = [
  "const-str",
  "indexmap",
- "oxpm_common",
+ "oxpm_dep",
  "oxpm_semver",
  "serde",
  "smol_str",
  "thiserror",
  "toml",
-]
-
-[[package]]
-name = "oxpm_npm"
-version = "0.1.0"
-dependencies = [
- "indexmap",
- "oxpm_common",
- "oxpm_lockfile",
- "oxpm_package_json",
- "oxpm_semver",
- "rayon",
- "rust-ini",
- "serde",
- "serde_json",
- "smol_str",
- "thiserror",
- "url",
 ]
 
 [[package]]
@@ -1117,21 +1108,9 @@ dependencies = [
 name = "oxpm_resolver"
 version = "0.1.0"
 dependencies = [
- "flate2",
- "indexmap",
- "oxpm_common",
- "oxpm_config",
- "oxpm_package_json",
- "oxpm_registry",
- "oxpm_semver",
- "reqwest",
- "serde",
- "serde_json",
+ "async-trait",
+ "oxpm_dep",
  "smol_str",
- "tar",
- "thiserror",
- "tokio",
- "url",
 ]
 
 [[package]]
@@ -1148,15 +1127,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "oxpm_tar"
+name = "oxpm_source"
 version = "0.1.0"
 dependencies = [
- "bzip2",
+ "smol_str",
+ "thiserror",
+]
+
+[[package]]
+name = "oxpm_tarball"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
  "flate2",
+ "oxpm_dep",
+ "oxpm_package_json",
+ "oxpm_resolver",
+ "oxpm_source",
+ "serde",
+ "smol_str",
+ "sugar_path",
  "tar",
  "thiserror",
- "walkdir",
- "zstd",
+ "tokio",
+ "url",
 ]
 
 [[package]]
@@ -1180,12 +1174,6 @@ name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
-
-[[package]]
-name = "pkg-config"
-version = "0.3.33"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e"
 
 [[package]]
 name = "plotters"
@@ -1443,16 +1431,6 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "rust-ini"
-version = "0.21.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "796e8d2b6696392a43bea58116b667fb4c29727dc5abd27d6acf338bb4f688c7"
-dependencies = [
- "cfg-if",
- "ordered-multimap",
 ]
 
 [[package]]
@@ -1830,15 +1808,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn",
-]
-
-[[package]]
-name = "tiny-keccak"
-version = "2.0.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
-dependencies = [
- "crunchy",
 ]
 
 [[package]]
@@ -2541,31 +2510,3 @@ name = "zmij"
 version = "1.0.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
-
-[[package]]
-name = "zstd"
-version = "0.13.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e91ee311a569c327171651566e07972200e76fcfe2242a4fa446149a3881c08a"
-dependencies = [
- "zstd-safe",
-]
-
-[[package]]
-name = "zstd-safe"
-version = "7.2.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8f49c4d5f0abb602a93fb8736af2a4f4dd9512e36f7f570d66e65ff867ed3b9d"
-dependencies = [
- "zstd-sys",
-]
-
-[[package]]
-name = "zstd-sys"
-version = "2.0.16+zstd.1.5.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "91e19ebc2adc8f83e43039e79776e3fda8ca919132d68a1fed6a5faca2683748"
-dependencies = [
- "cc",
- "pkg-config",
-]

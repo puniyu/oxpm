@@ -1,0 +1,17 @@
+[package]
+name = "oxpm_git"
+version = "0.1.0"
+edition.workspace = true
+
+[dependencies]
+oxpm_source.workspace = true
+oxpm_resolver.workspace = true
+oxpm_dep.workspace = true
+oxpm_semver.workspace = true
+serde.workspace = true
+smol_str.workspace = true
+url.workspace = true
+thiserror.workspace = true
+
+async-trait.workspace = true
+tokio.workspace = true

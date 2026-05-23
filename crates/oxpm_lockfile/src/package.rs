@@ -1,28 +1,8 @@
 use std::hash::Hash;
 use indexmap::IndexMap;
-use oxpm_common::SourceType;
 use oxpm_semver::Version;
 use serde::{Deserialize, Deserializer, Serialize};
 use smol_str::SmolStr;
-
-fn serialize_as_source_string<S>(source: &SourceType, s: S) -> Result<S::Ok, S::Error>
-where
-	S: serde::Serializer,
-{
-	s.serialize_str(&source.to_source_string())
-}
-
-fn deserialize_from_source_string<'de, D>(d: D) -> Result<SourceType, D::Error>
-where
-	D: serde::Deserializer<'de>,
-{
-	let s = SmolStr::deserialize(d)?;
-	if s.is_empty() {
-		return Err(serde::de::Error::custom("empty source string"));
-	}
-	SourceType::parse(&s).map_err(serde::de::Error::custom)
-}
-
 
 fn empty_vec_as_none<'de, D, T>(deserializer: D) -> Result<Option<Vec<T>>, D::Error>
 where
@@ -65,11 +45,7 @@ pub struct Package {
 	/// 锁定的精确版本号。
 	pub version: Version,
 	/// 包来源，序列化为 `registry+https://registry.npmjs.org`、`git+...`、`file:...` 等格式。
-	#[serde(
-		serialize_with = "serialize_as_source_string",
-		deserialize_with = "deserialize_from_source_string"
-	)]
-	pub source: SourceType,
+	pub source: SmolStr,
 	/// SRI 完整性哈希，例如 `sha512-...`。
 	#[serde(
 		default,
@@ -148,10 +124,7 @@ source = "registry+https://registry.npmjs.org"
 "#);
 		assert_eq!(pkg.name.as_str(), "lodash");
 		assert_eq!(pkg.version.to_string(), "4.17.21");
-		assert_eq!(
-			pkg.source.to_source_string().as_str(),
-			"registry+https://registry.npmjs.org"
-		);
+		assert_eq!(pkg.source.as_str(), "registry+https://registry.npmjs.org");
 		assert!(pkg.integrity.is_none());
 		assert!(pkg.dependencies.is_none());
 		assert!(pkg.dev_dependencies.is_none());
@@ -170,10 +143,7 @@ optionalDependencies = ["fsevents@^2.0.0"]
 peerDependencies = ["react@^18.0.0"]
 "#);
 		assert_eq!(pkg.name.as_str(), "express");
-		assert_eq!(
-			pkg.source.to_source_string().as_str(),
-			"registry+https://registry.npmjs.org"
-		);
+		assert_eq!(pkg.source.as_str(), "registry+https://registry.npmjs.org");
 		assert_eq!(pkg.integrity.expect("integrity").as_str(), "sha512-abc123");
 		let deps = pkg.dependencies.expect("dependencies");
 		assert_eq!(deps.len(), 2);
@@ -191,10 +161,7 @@ name = "my-fork"
 version = "1.0.0"
 source = "git+https://github.com/user/fork#abcdef1234567890"
 "#);
-		assert_eq!(
-			pkg.source.to_source_string().as_str(),
-			"git+https://github.com/user/fork#abcdef1234567890"
-		);
+		assert_eq!(pkg.source.as_str(), "git+https://github.com/user/fork#abcdef1234567890");
 	}
 
 	#[test]
@@ -227,10 +194,7 @@ dependencies = ["dep-a@1.0.0"]
 		let reparsed: Package = de(&serialized);
 		assert_eq!(reparsed.name.as_str(), "lodash");
 		assert_eq!(reparsed.version.to_string(), "4.17.21");
-		assert_eq!(
-			reparsed.source.to_source_string().as_str(),
-			"registry+https://registry.npmjs.org"
-		);
+		assert_eq!(reparsed.source.as_str(), "registry+https://registry.npmjs.org");
 	}
 
 	#[test]
@@ -267,7 +231,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "empty-deps".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
+			source: SmolStr::new("registry+https://registry.npmjs.org"),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -292,7 +256,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "express".into(),
 			version: "4.18.2".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
+			source: SmolStr::new("registry+https://registry.npmjs.org"),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -313,7 +277,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "no-engines".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
+			source: SmolStr::new("registry+https://registry.npmjs.org"),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -333,7 +297,7 @@ source = "registry+https://registry.npmjs.org"
 		let pkg = Package {
 			name: "no-bin".into(),
 			version: "1.0.0".parse().unwrap(),
-			source: SourceType::parse("registry+https://registry.npmjs.org").unwrap(),
+			source: SmolStr::new("registry+https://registry.npmjs.org"),
 			integrity: None,
 			dependencies: None,
 			dev_dependencies: None,
@@ -391,7 +355,7 @@ name = "local-pkg"
 version = "1.0.0"
 source = "file:../packages/local"
 "#);
-		assert_eq!(pkg.source.to_source_string().as_str(), "file:../packages/local");
+		assert_eq!(pkg.source.as_str(), "file:../packages/local");
 	}
 
 	#[test]
@@ -401,7 +365,7 @@ name = "workspace-pkg"
 version = "1.0.0"
 source = "link:../workspace/pkg"
 "#);
-		assert_eq!(pkg.source.to_source_string().as_str(), "link:../workspace/pkg");
+		assert_eq!(pkg.source.as_str(), "link:../workspace/pkg");
 	}
 
 	#[test]

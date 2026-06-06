@@ -30,4 +30,4 @@ mime = "0.3.17"
 tokio.workspace = true
 
 [build-dependencies]
-cargo_metadata.workspace = true
+oxpm_version.workspace = true

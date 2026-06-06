@@ -16,7 +16,7 @@ pub enum Error {
     VersionConflict { name: SmolStr },
 
     #[error("source error: {0}")]
-    Source(#[from] oxpm_common::SourceError),
+    Source(String),
 
     #[error("registry error: {0}")]
     Registry(#[from] oxpm_registry::Error),

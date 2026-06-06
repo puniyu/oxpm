@@ -33,21 +33,23 @@ cargo_metadata = { version = "0.23.1" }
 tokio = { version = "1.52.3", features = ["macros", "rt-multi-thread"] }
 rayon = { version = "1.12.0" }
 
-oxpm_semver = { version = "0.1.0", path = "./crates/oxpm_semver" }
 oxpm_source = { version = "0.1.0", path = "./crates/oxpm_source" }
+oxpm_semver = { version = "0.1.0", path = "./crates/oxpm_semver" }
+oxpm_version = { version = "0.1.0", path = "./crates/oxpm_version" }
 oxpm_dep = { version = "0.1.0", path = "./crates/oxpm_dep" }
 oxpm_file = { version = "0.1.0", path = "./crates/oxpm_file" }
 oxpm_git = { version = "0.1.0", path = "./crates/oxpm_git" }
 oxpm_link = { version = "0.1.0", path = "./crates/oxpm_link" }
 oxpm_tarball = { version = "0.1.0", path = "./crates/oxpm_tarball" }
-oxpm_tar = { version = "0.1.0", path = "./crates/oxpm_tar" }
-oxpm_common = { version = "0.1.0", path = "./crates/oxpm_common" }
 oxpm_config = { version = "0.1.0", path = "./crates/oxpm_config" }
 oxpm_package_json = { version = "0.1.0", path = "./crates/oxpm_package_json" }
 oxpm_lockfile = { version = "0.1.0", path = "./crates/oxpm_lockfile" }
 oxpm_npm = { version = "0.1.0", path = "./crates/oxpm_npm" }
 oxpm_registry = { version = "0.1.0", path = "./crates/oxpm_registry" }
 oxpm_resolver = { version = "0.1.0", path = "./crates/oxpm_resolver" }
+oxpm_path = { version = "0.1.0", path = "./crates/oxpm_path" }
+oxpm_store = { version = "0.1.0", path = "./crates/oxpm_store" }
+oxpm_dir_link = { version = "0.1.0", path = "./crates/oxpm_dir_link" }
 
 
 [profile.release]

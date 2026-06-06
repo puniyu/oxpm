@@ -8,10 +8,16 @@ oxpm_source.workspace = true
 oxpm_resolver.workspace = true
 oxpm_dep.workspace = true
 oxpm_semver.workspace = true
+oxpm_package_json.workspace = true
+oxpm_path.workspace = true
+
 serde.workspace = true
 smol_str.workspace = true
 url.workspace = true
 thiserror.workspace = true
+blake3.workspace = true
 
 async-trait.workspace = true
 tokio.workspace = true
+
+git2 = "0.20"

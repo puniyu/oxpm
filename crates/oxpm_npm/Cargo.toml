@@ -1,0 +1,27 @@
+[package]
+name = "oxpm_npm"
+version = "0.1.0"
+description = "npm protocol resolver for oxpm"
+authors.workspace = true
+license.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+oxpm_registry.workspace = true
+oxpm_resolver.workspace = true
+oxpm_dep.workspace = true
+oxpm_semver.workspace = true
+oxpm_source.workspace = true
+
+async-trait.workspace = true
+smol_str.workspace = true
+thiserror.workspace = true
+url.workspace = true
+serde.workspace = true
+
+[dev-dependencies]
+tokio.workspace = true

@@ -1,0 +1,20 @@
+[package]
+name = "oxpm_store"
+version = "0.1.0"
+description = "Content-addressable store for oxpm"
+authors.workspace = true
+license.workspace = true
+readme.workspace = true
+homepage.workspace = true
+repository.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+oxpm_path.workspace = true
+oxpm_package_json.workspace = true
+
+thiserror.workspace = true
+blake3.workspace = true
+tar.workspace = true
+flate2.workspace = true

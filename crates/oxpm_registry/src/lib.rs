@@ -9,7 +9,7 @@ pub use types::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-const USER_AGENT: &str = concat!("fnpm", "/", env!("CORE_VERSION"));
+const USER_AGENT: &str = concat!("fnpm", "/", env!("VERSION"));
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum RegistryAuth {

@@ -20,4 +20,4 @@ blake3.workspace = true
 async-trait.workspace = true
 tokio.workspace = true
 
-git2 = "0.20"
+git2 = "0.21"
